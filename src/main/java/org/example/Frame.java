@@ -1,5 +1,7 @@
 package org.example;
 
+import java.util.Arrays;
+
 public class Frame {
     private byte[] content; // array of bytes to hold content of a frame
     private boolean dirty; // set to True if the content of this block has changed and need to be written
@@ -21,7 +23,6 @@ public class Frame {
 
     public void setContent(byte[] content) {
         this.content = content;
-        setDirty(true);
     }
 
     public boolean isDirty() {
@@ -48,6 +49,13 @@ public class Frame {
         this.blockID = blockID;
     }
 
+    public void resetFrame() {
+        this.content = null;
+        this.dirty = false;
+        this.pinned = false;
+        this.blockID = -1;
+    }
+
     // return a specified record from the block
     public String getRecord(int recordNumber) {
         // parse through the file (byte array) and return the correct record
@@ -68,18 +76,34 @@ public class Frame {
     }
 
     // set a specified record in the block
-    public void setRecord(int recordNumber, String record) {
-        if (recordNumber < 0 || recordNumber >= 100) { // check if record number is between 0 and 100
-            throw new IllegalAccessError("Record number must be between 0 and 100");
-        }
-
-        int offset = recordNumber * 40; // calculate offset of the record
-
-        // copy the record from the record array to the block
-        for (int i = 0; i < 40; i++) {
-            content[offset + i] = record.getBytes()[i];
+    public void setRecord(int recordNumber, byte[] newRecord) {
+        // parse through the file (byte array) and find the location of the record to be changed
+        int recordInArray = findValueInByteArray(this.content, newRecord);
+        //System.out.println("Record found at index: " + recordInArray);
+        // replace the record with the new record   
+        if (recordInArray != -1) {
+            for (int i = 0; i < newRecord.length; i++) {
+                this.content[recordInArray + i] = newRecord[i];
+            }
         }
 
         setDirty(true); // set dirty to true since the content of the block has changed
+    }
+
+    public static int findValueInByteArray(byte[] array, byte[] newRecord) {
+        byte[] value = Arrays.copyOfRange(newRecord, 0, 10);
+        for (int i = 0; i < value.length - value.length + 1; i++) {
+            boolean found = true;
+            for(int j = 0; j < value.length; j++) {
+                if (array[i + j] != value[j]) {
+                    found = false;
+                    break;
+                }
+            }
+            if (found) {
+                return i;
+            }
+        }
+        return -1;
     }
 }
