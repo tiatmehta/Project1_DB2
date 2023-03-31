@@ -18,4 +18,11 @@ it's because I need to change it to read/write the file.
 
 The program does run successfully for most of the commands.
 
-Section 3: 
+Section 3: Design Decisions
+I tried implementing a version of LRU in the eviction function, but I'm not sure if it works properly. If I 
+had more time, I would've added more metadata to the Frame class with the time the frame was added, but I 
+was unable to.
+
+An extra function I wrote in Frame was: findValueInByteArray. This function is supposed to take in the byte[]
+record and parse through the byte[] content and find the index of the record that is getting changed, and then
+change it in setRecord.
